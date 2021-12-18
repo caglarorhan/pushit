@@ -12,22 +12,6 @@ if(!WDC.hasOwnProperty('datatypeandsendmethod')) WDC.datatypeandsendmethod = {me
 if(!WDC.hasOwnProperty('pkey')) WDC.pkey = '000';
 if(!WDC.user.hasOwnProperty('email')) WDC.user.email ='';
 
-// window.addEventListener('beforeinstallprompt', (e) => {
-//     e.preventDefault();
-//     let deferredPrompt = e;
-//     document.querySelector('#addBtn').addEventListener('click', e=>{
-//         deferredPrompt.prompt();
-//         deferredPrompt.userChoice.then(choiceResult=>{
-//             console.log(choiceResult.outcome);
-//             deferredPrompt = null;
-//         });
-//     });
-// });
-// TODO browser turune gore push registration ve push notification gonderme ozellestirme islemleri
-// Desktop: Chrome, Safari, Edge, Firefox sirali kullanim yuzdeleri buyukten kucuge dogru
-// Mobile: Chrome, Safari, Samsung, Opera sirali kullanim yuzdeleri buyukten kucuge dogru
-// Tablet: Safari, Chrome, Android, Samsung, Opera, Firefox sirali kullanim yuzdeleri buyukten kucuge dogru
-//----------------------------------------------------------------------------------------------/
 WDC.push.init = ()=>{
     WDC.push.getConfigJson()
         .then(jsonData=>{
@@ -103,27 +87,27 @@ WDC.serviceworker.register=(scriptURL)=>{
 WDC.push.unsubscribe=()=>{
     navigator.serviceWorker.ready
         .then(reg=>{
-            reg.pushManager.permissionState(REGISTRY_OPTIONS)
+            reg.pushManager.permissionState(WDC.push.registryOptions(WDC.pkey))
                 .then(perm=>{
                     switch(perm){
                         case "prompt":
-                            //console.log('Push permission is on prompt stage!');
+                            console.log('Push permission is on prompt stage!');
                             break;
                         case "granted":
-                            //console.log(`Push permisson is `,perm);//unsubscribe
+                            console.log(`Push permisson is `,perm);//unsubscribe
                             navigator.serviceWorker.ready.then(function(reg) {
                                 reg.pushManager.getSubscription().then(function(subscription) {
                                     subscription.unsubscribe().then(function(successful) {
-                                        // You've successfully unsubscribed
+                                        console.log('You have successfully unsubscribed!', successful);
                                     }).catch(function(e) {
-                                        // Unsubscription failed
+                                        console.log('Unsubscribe action failed with ', e);
                                     })
                                 })
                             });
 
                             break;
                         case "denied":
-                            //console.log('Push permission is denied by user!');
+                            console.log('Push permission is denied by user!');
                             break;
                     }
                 })
@@ -256,6 +240,11 @@ WDC.helpers.urlB64ToUint8Array =(base64String)=>{
 
 WDC.logger.log = (log={"source":"unknown", "type":"general", "logDateTime":new Date(), "log":"log notes"})=>{
     WDC.logger.data.push(log);
+}
+window.onload = ()=>{
+    document.getElementById('unsubscribeButton').addEventListener('click', ()=>{
+        WDC.push.unsubscribe();
+    })
 }
 
 
